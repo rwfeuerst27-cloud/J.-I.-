@@ -127,31 +127,31 @@ const GROUPS = [
   ["ATMOSPHERE / CONFINED SPACE",[
     "Hazardous atmosphere tested (if applicable)?",
     "Ventilation adequate (if applicable)?",
-    "Confined space entry procedures followed (if applic.)?"]],
+    "Confined space entry procedures followed (if applic.)?" ]],
   ["PERSONNEL / FALL / TRAFFIC",[
     "Fall protection for >6 ft excavations (if applic.)?",
     "Traffic control in place?",
     "Workers using required PPE?",
     "Competent person on site / inspecting?",
-    "Emergency equipment available?"]],
+    "Emergency equipment available?" ]],
   ["EQUIPMENT & TOOLS",[
     "Heavy equipment operating safely / clearances?",
     "Heavy equipment inspected daily?",
     "Lifting equipment inspected / good condition?",
     "Hand tools good condition?",
-    "Electrical cords / tools good condition & grounded?"]],
+    "Electrical cords / tools good condition & grounded?" ]],
   ["PIPE & TRENCH WORK",[
     "Pipe stored securely / clear pathways?",
     "Pipe lifting / handling procedures followed?",
     "Trench bedding properly prepared?",
-    "Backfill / compaction appropriate?"]],
+    "Backfill / compaction appropriate?" ]],
 ];
 const OPTS = ["OK","N/A","D"];
 
 /* ---- ink globals (declared before DOM build calls addInk) ---- */
 const DPR = Math.min(window.devicePixelRatio||1, 3);
 const inkState = [];            // per-sheet: {el,canvas,ctx,strokes,cur}
-const undoStack = [];           // sheet index per stroke, for global undo
+const undoStack = [];           // action stack: {t:'ink',sheet:N} or {t:'radio',item:N,prev:val}
 let penColor='#1a1a1a', penWidth=3, eraser=false, penOnly=true;
 
 /* ============================ BUILD DOM ============================ */
@@ -202,9 +202,22 @@ function sheet(){ const s=el('div','sheet'); sheetsEl.appendChild(s); return s; 
       const row=el('div','ckrow'+(idx%2?' z':'')); row.appendChild(el('span','q',q));
       OPTS.forEach((o,oi)=>{
         const cell=el('div','opt'); const b=el('div','box'); b.dataset.item=idx; b.dataset.val=oi;
-        b.addEventListener('click',()=>{ // mutually exclusive within row
-          document.querySelectorAll('.box[data-item="'+idx+'"]').forEach(x=>x.classList.remove('sel'));
-          b.classList.add('sel'); persist();
+        b.addEventListener('click',()=>{ // mutually exclusive within row, now toggleable and recorded in undo stack
+          const item = idx;
+          const current = document.querySelector('.box[data-item="'+item+'"].sel');
+          const prevVal = current ? current.dataset.val : null;
+          const isSame = current === b;
+          // record previous state so Undo can restore
+          undoStack.push({t:'radio', item: item, prev: prevVal});
+
+          if(isSame){
+            // clicking the already-selected box will unselect it
+            b.classList.remove('sel');
+          } else {
+            document.querySelectorAll('.box[data-item="'+item+'"]').forEach(x=>x.classList.remove('sel'));
+            b.classList.add('sel');
+          }
+          persist();
         });
         cell.appendChild(b); row.appendChild(cell);
       });
@@ -262,7 +275,8 @@ function addInk(sheetEl){
     const p=pt(st,e); st.cur.pts.push(p); drawSeg(st,st.cur, st.cur.pts.length-2); e.preventDefault();
   });
   const end=e=>{ if(!drawing) return; drawing=false;
-    if(st.cur && st.cur.pts.length){ st.strokes.push(st.cur); undoStack.push(i); persist(); }
+    if(st.cur && st.cur.pts.length){ st.strokes.push(st.cur); // record ink action for undo
+      undoStack.push({t:'ink', sheet: i}); persist(); }
     st.cur=null; };
   sheetEl.addEventListener('pointerup',end);
   sheetEl.addEventListener('pointercancel',end);
@@ -315,11 +329,17 @@ document.getElementById('newday').addEventListener('click',()=>{
   if(confirm('Start a fresh blank form? Current entries are cleared.')){ localStorage.removeItem(KEY); location.reload(); }
 });
 document.getElementById('save').addEventListener('click',saveShare);
-function doUndo(){ const i=undoStack.pop(); if(i==null) return; const st=inkState[i]; st.strokes.pop(); redraw(st); persist(); }
+function doUndo(){ const a=undoStack.pop(); if(a==null) return;
+  // support legacy numeric entries (sheet index for ink) and new action objects
+  if(typeof a === 'number'){ const st=inkState[a]; if(st && st.strokes.length){ st.strokes.pop(); redraw(st); } }
+  else if(a.t === 'ink'){ const st=inkState[a.sheet]; if(st && st.strokes.length){ st.strokes.pop(); redraw(st); } }
+  else if(a.t === 'radio'){ const item = a.item; document.querySelectorAll('.box[data-item="'+item+'"]').forEach(x=>x.classList.remove('sel'));
+    if(a.prev!=null){ const b=document.querySelector('.box[data-item="'+item+'"][data-val="'+a.prev+'"]'); if(b) b.classList.add('sel'); }
+  }
+  persist(); }
 function topSheet(){ // sheet most in view
   let best=null,bd=1e9; inkState.forEach(st=>{ const r=st.el.getBoundingClientRect();
-    const d=Math.abs(r.top); if(r.bottom>0 && d<bd){bd=d;best=st;} }); return best||inkState[0];
-}
+    const d=Math.abs(r.top); if(r.bottom>0 && d<bd){bd=d;best=st;} }); return best||inkState[0]; }
 document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); saveShare(); }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); doUndo(); }
