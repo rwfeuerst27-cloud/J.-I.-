@@ -287,14 +287,25 @@ window.addEventListener('resize',()=>inkState.forEach(sizeCanvas));
 
 /* ============================ TOOLBAR ============================ */
 document.querySelectorAll('.swatch').forEach(sw=>sw.addEventListener('click',()=>{
-  document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('sel')); sw.classList.add('sel');
-  penColor=sw.dataset.c; eraser=false; document.getElementById('eraser').classList.remove('on');
+  document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('sel')); 
+  sw.classList.add('sel');
+  penColor=sw.dataset.c; 
+  eraser=false; 
+  document.getElementById('eraser').classList.remove('on');
+  persist();
 }));
 document.getElementById('penW').addEventListener('input',e=>penWidth=+e.target.value);
-document.getElementById('eraser').addEventListener('click',e=>{ eraser=!eraser; e.target.classList.toggle('on',eraser); });
+document.getElementById('eraser').addEventListener('click',e=>{ 
+  eraser=!eraser; 
+  e.target.classList.toggle('on',eraser);
+  if(eraser) document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('sel'));
+  persist();
+});
 document.getElementById('penToggle').addEventListener('click',e=>{
-  penOnly=!penOnly; e.target.classList.toggle('on',penOnly);
+  penOnly=!penOnly; 
+  e.target.classList.toggle('on',penOnly);
   e.target.textContent = penOnly? '✎ Pen: S-Pen' : '✎ Pen: Any';
+  persist();
 });
 document.getElementById('clear').addEventListener('click',()=>{
   const st=topSheet(); if(st && confirm('Clear ink on this page?')){ st.strokes=[]; redraw(st); persist(); }
