@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#E8531A">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Daily Inspection</title>
+<style>
+  :root{ --ink:#1a1a1a; --orange:#e8531a; --dark:#2b2b2b; --rule:#8a8a8a; --zebra:#f1efec; --grey:#707070; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; background:#e6e6e3; font-family:Arial,Helvetica,sans-serif; color:var(--ink); }
+  /* ---------- toolbar ---------- */
+  #bar{ position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:8px;
+        background:var(--dark); color:#fff; padding:8px 12px; flex-wrap:wrap;
+        box-shadow:0 2px 6px rgba(0,0,0,.3); }
+  #bar .title{ font-weight:bold; font-size:15px; letter-spacing:.3px; margin-right:6px; }
+  #bar .spacer{ flex:1; }
+  .tbtn{ background:#3a3a3a; color:#fff; border:1px solid #555; border-radius:6px;
+         padding:7px 11px; font-size:13px; font-weight:bold; cursor:pointer; user-select:none; }
+  .tbtn:hover{ background:#474747; }
+  .tbtn.on{ background:var(--orange); border-color:var(--orange); }
+  .tbtn.save{ background:var(--orange); border-color:var(--orange); font-size:14px; }
+  .tbtn.save:hover{ filter:brightness(1.07); }
+  .swatch{ width:22px; height:22px; border-radius:50%; border:2px solid #fff; cursor:pointer; }
+  .swatch.sel{ outline:3px solid var(--orange); outline-offset:1px; }
+  #penW{ width:90px; }
+  .hint{ font-size:11px; color:#bdbdbd; }
+  /* ---------- sheets ---------- */
+  #sheets{ display:flex; flex-direction:column; align-items:center; gap:20px; padding:22px 10px 60px; }
+  .sheet{ position:relative; width:816px; min-height:1056px; background:#fff;
+          box-shadow:0 4px 18px rgba(0,0,0,.22); overflow:hidden; }
+  .ink{ position:absolute; inset:0; pointer-events:none; z-index:10; touch-action:none; }
+  .pad{ padding:42px 46px; }
+  /* header band */
+  .band{ position:relative; background:var(--orange); color:#fff; height:54px;
+         display:flex; align-items:center; padding:0 46px; }
+  .band h1{ font-size:23px; margin:0; letter-spacing:.4px; }
+  .band .sub{ margin-left:auto; font-size:11px; font-weight:bold; letter-spacing:.5px; }
+  .band::after{ content:""; position:absolute; left:0; right:0; bottom:-4px; height:4px; background:var(--ink); }
+  .reg{ color:var(--grey); font-style:italic; font-size:10px; padding:8px 46px 0; }
+  /* section bar */
+  .sec{ background:var(--dark); color:#fff; font-weight:bold; font-size:12px; letter-spacing:.5px;
+        padding:5px 12px; margin:16px 0 14px; border-left:5px solid var(--orange); }
+  /* fields */
+  .fld{ margin-bottom:20px; }
+  .fld label{ display:block; font-size:9.5px; font-weight:bold; letter-spacing:.4px; margin-bottom:18px; }
+  .write{ min-height:30px; border-bottom:1px solid var(--rule); padding:2px 2px 4px;
+          font-size:17px; outline:none; line-height:1.3; }
+  .write:focus{ border-bottom:2px solid var(--orange); }
+  .write:empty:before{ content:attr(data-ph); color:#c4c4c4; font-style:italic; font-size:13px; }
+  body.exporting .write:empty:before{ content:""; }
+  .row{ display:flex; gap:26px; }
+  .row .fld{ flex:1; }
+  .strip{ display:flex; align-items:flex-end; padding:0 46px; margin-top:10px; }
+  .strip .fld{ margin-bottom:6px; margin-right:26px; flex:1; }
+  .strip .fld:first-child{ flex:0 0 200px; }
+  .strip .fld:last-child{ margin-right:0; }
+  .strip label{ margin-bottom:10px; }
+  /* checklist */
+  .legend{ font-size:10px; font-weight:bold; margin-bottom:8px; }
+  .legend span{ margin-right:22px; }
+  .legend .ok{ color:#1a7f37; } .legend .na{ color:var(--grey); } .legend .d{ color:var(--orange); }
+  .ckhead{ display:flex; font-size:10px; font-weight:bold; border-bottom:1px solid var(--ink); padding-bottom:3px; }
+  .ckhead .q{ flex:1; } .ckhead .c{ width:60px; text-align:center; }
+  .grphead{ background:var(--orange); color:#fff; font-weight:bold; font-size:10px; letter-spacing:.5px;
+            padding:3px 8px; margin-top:8px; }
+  .ckrow{ display:flex; align-items:center; min-height:30px; font-size:13px; padding-left:6px; }
+  .ckrow.z{ background:var(--zebra); }
+  .ckrow .q{ flex:1; padding-right:8px; }
+  .opt{ width:60px; display:flex; justify-content:center; }
+  .box{ width:20px; height:20px; border:1.3px solid var(--ink); background:#fff; border-radius:2px;
+        cursor:pointer; position:relative; }
+  .box.sel::after{ content:""; position:absolute; left:4px; top:0px; width:7px; height:13px;
+        border:solid var(--ink); border-width:0 2.6px 2.6px 0; transform:rotate(40deg); }
+  /* notes */
+  .lines{ margin-top:8px; }
+  .nline{ border-bottom:1px solid var(--rule); height:34px; }
+  /* signoff */
+  .sign{ height:46px; border-bottom:1.5px solid var(--ink); }
+  .siglbl{ font-size:9.5px; font-weight:bold; letter-spacing:.4px; margin-top:5px; }
+  .foot{ position:absolute; bottom:14px; left:46px; font-size:9px; color:var(--grey); font-style:italic; }
+  /* toast */
+  #toast{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:var(--dark);
+          color:#fff; padding:11px 18px; border-radius:8px; font-size:13px; z-index:99; opacity:0;
+          transition:opacity .25s; pointer-events:none; box-shadow:0 3px 12px rgba(0,0,0,.4); }
+  #toast.show{ opacity:1; }
+  @media (max-width:860px){ .sheet{ transform-origin:top center; } }
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <span class="title">DAILY INSPECTION</span>
+  <button class="tbtn on" id="penToggle" title="Pen captures S-Pen only">✎ Pen: S-Pen</button>
+  <button class="tbtn" id="eraser" title="Eraser">⌫ Erase</button>
+  <span class="swatch sel" data-c="#1a1a1a" style="background:#1a1a1a"></span>
+  <span class="swatch" data-c="#0050d8" style="background:#0050d8"></span>
+  <span class="swatch" data-c="#e8531a" style="background:#e8531a"></span>
+  <input type="range" id="penW" min="1" max="8" value="3" title="Pen width">
+  <button class="tbtn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
+  <button class="tbtn" id="clear" title="Clear ink this page">Clear ink</button>
+  <span class="spacer"></span>
+  <span class="hint" id="autosave">saved</span>
+  <button class="tbtn" id="newday" title="Start a fresh blank form">New</button>
+  <button class="tbtn save" id="save" title="Flatten &amp; send to Drive (Ctrl+S)">⤓ Save → Drive</button>
+</div>
+
+<div id="sheets"></div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/* ============================ DATA ============================ */
+const GROUPS = [
+  ["EXCAVATION & SOIL",[
+    "Excavation walls stable?",
+    "Trench box / shoring good condition & installed?",
+    "Spoil piles 2 ft from edge?",
+    "Water accumulation controlled?",
+    "Safe access / egress within 25 ft?"]],
+  ["UTILITIES",[
+    "Underground utilities located / marked?",
+    "Overhead utility clearances maintained?"]],
+  ["ATMOSPHERE / CONFINED SPACE",[
+    "Hazardous atmosphere tested (if applicable)?",
+    "Ventilation adequate (if applicable)?",
+    "Confined space entry procedures followed (if applic.)?"]],
+  ["PERSONNEL / FALL / TRAFFIC",[
+    "Fall protection for >6 ft excavations (if applic.)?",
+    "Traffic control in place?",
+    "Workers using required PPE?",
+    "Competent person on site / inspecting?",
+    "Emergency equipment available?"]],
+  ["EQUIPMENT & TOOLS",[
+    "Heavy equipment operating safely / clearances?",
+    "Heavy equipment inspected daily?",
+    "Lifting equipment inspected / good condition?",
+    "Hand tools good condition?",
+    "Electrical cords / tools good condition & grounded?"]],
+  ["PIPE & TRENCH WORK",[
+    "Pipe stored securely / clear pathways?",
+    "Pipe lifting / handling procedures followed?",
+    "Trench bedding properly prepared?",
+    "Backfill / compaction appropriate?"]],
+];
+const OPTS = ["OK","N/A","D"];
+
+/* ---- ink globals (declared before DOM build calls addInk) ---- */
+const DPR = Math.min(window.devicePixelRatio||1, 3);
+const inkState = [];            // per-sheet: {el,canvas,ctx,strokes,cur}
+const undoStack = [];           // sheet index per stroke, for global undo
+let penColor='#1a1a1a', penWidth=3, eraser=false, penOnly=true;
+
+/* ============================ BUILD DOM ============================ */
+const sheetsEl = document.getElementById('sheets');
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+function field(id, label, ph){
+  const f=el('div','fld'); const l=el('label',null,label); l.setAttribute('for',id);
+  const w=el('div','write'); w.id=id; w.contentEditable='true'; w.setAttribute('data-ph',ph||'');
+  f.append(l,w); return f;
+}
+function sheet(){ const s=el('div','sheet'); sheetsEl.appendChild(s); return s; }
+
+/* ---- Sheet 1: info ---- */
+(function(){
+  const s=sheet();
+  const band=el('div','band','<h1>DAILY JOBSITE INSPECTION</h1><span class="sub">EXCAVATION &amp; UNDERGROUND PIPE</span>');
+  s.appendChild(band);
+  s.appendChild(el('div','reg','Competent Person daily record  —  29 CFR 1926 Subpart P'));
+  const strip=el('div','strip');
+  strip.append(field('f_date','DATE','tap or write'), field('f_time','TIME',''), field('f_weather','WEATHER',''));
+  s.appendChild(strip);
+  const pad=el('div','pad');
+  pad.appendChild(el('div','sec','GENERAL INFORMATION'));
+  pad.appendChild(field('f_project','PROJECT NAME',''));
+  pad.appendChild(field('f_location','JOBSITE LOCATION',''));
+  const r1=el('div','row'); r1.append(field('f_inspector','INSPECTOR  (COMPETENT PERSON)',''), field('f_super','SUPERINTENDENT','')); pad.appendChild(r1);
+  pad.appendChild(el('div','sec','EXCAVATION DETAILS'));
+  const r2=el('div','row'); r2.append(field('f_depth','MAX DEPTH (FT)',''), field('f_width','MAX WIDTH (FT)',''), field('f_soil','SOIL TYPE','')); pad.appendChild(r2);
+  pad.appendChild(field('f_prot','PROTECTIVE SYSTEM  (TRENCH BOX / SHORING / SLOPE / BENCHING)',''));
+  s.appendChild(pad);
+  s.appendChild(el('div','foot','Page 1 of 3'));
+  addInk(s);
+})();
+
+/* ---- Sheet 2: checklist ---- */
+(function(){
+  const s=sheet();
+  const band=el('div','band','<h1>SAFETY &amp; COMPLIANCE CHECKLIST</h1><span class="sub">TAP A BOX PER LINE</span>');
+  s.appendChild(band);
+  const pad=el('div','pad');
+  pad.appendChild(el('div','legend','<span class="ok">OK = Acceptable</span><span class="na">N/A = Not Applicable</span><span class="d">D = Deficient (corrective action)</span>'));
+  const head=el('div','ckhead'); head.appendChild(el('span','q',''));
+  OPTS.forEach(o=>head.appendChild(el('span','c',o))); pad.appendChild(head);
+  let idx=0;
+  GROUPS.forEach(([g,items])=>{
+    pad.appendChild(el('div','grphead',g));
+    items.forEach(q=>{
+      const row=el('div','ckrow'+(idx%2?' z':'')); row.appendChild(el('span','q',q));
+      OPTS.forEach((o,oi)=>{
+        const cell=el('div','opt'); const b=el('div','box'); b.dataset.item=idx; b.dataset.val=oi;
+        b.addEventListener('click',()=>{ // mutually exclusive within row
+          document.querySelectorAll('.box[data-item="'+idx+'"]').forEach(x=>x.classList.remove('sel'));
+          b.classList.add('sel'); persist();
+        });
+        cell.appendChild(b); row.appendChild(cell);
+      });
+      pad.appendChild(row); idx++;
+    });
+  });
+  s.appendChild(pad);
+  s.appendChild(el('div','foot',"Page 2 of 3  —  any 'D' = log it on page 3"));
+  addInk(s);
+})();
+
+/* ---- Sheet 3: notes + signoff ---- */
+(function(){
+  const s=sheet();
+  const band=el('div','band','<h1>OBSERVATIONS &amp; SIGN-OFF</h1>');
+  s.appendChild(band);
+  const pad=el('div','pad');
+  pad.appendChild(el('div','sec','OBSERVATIONS, DEFICIENCIES & CORRECTIVE ACTIONS'));
+  const noteHint=el('div'); noteHint.style.cssText='color:#707070;font-style:italic;font-size:10px;margin:-6px 0 8px;';
+  noteHint.textContent="Note each 'D' item, action taken / required, and who + by when.";
+  pad.appendChild(noteHint);
+  const notes=el('div','write'); notes.id='f_notes'; notes.contentEditable='true';
+  notes.style.cssText='min-height:340px;border:none;font-size:16px;line-height:34px;background-image:repeating-linear-gradient(#fff,#fff 33px,#cfcfcf 33px,#cfcfcf 34px);';
+  pad.appendChild(notes);
+  pad.appendChild(el('div','sec','SIGN-OFF'));
+  const sg=el('div'); sg.style.marginTop='26px';
+  const sig=el('div','sign'); sig.style.width='62%'; sg.appendChild(sig);
+  sg.appendChild(el('div','siglbl','INSPECTOR / COMPETENT PERSON SIGNATURE  (sign with S-Pen)'));
+  pad.appendChild(sg);
+  const r=el('div','row'); r.style.marginTop='26px';
+  r.append(field('f_print','PRINT NAME',''), field('f_sigdate','DATE','')); pad.appendChild(r);
+  s.appendChild(pad);
+  s.appendChild(el('div','foot','Page 3 of 3'));
+  addInk(s);
+})();
+
+/* ============================ INK ENGINE ============================ */
+function addInk(sheetEl){
+  const cv=el('canvas','ink'); sheetEl.appendChild(cv);
+  const st={el:sheetEl, canvas:cv, ctx:cv.getContext('2d'), strokes:[], cur:null};
+  inkState.push(st);
+  const i=inkState.length-1;
+  sizeCanvas(st);
+  let drawing=false;
+  sheetEl.addEventListener('pointerdown',e=>{
+    if(penOnly && e.pointerType!=='pen') return;      // let trackpad/finger reach controls
+    if(!penOnly && e.pointerType==='mouse' && e.buttons!==1) return;
+    drawing=true; sheetEl.setPointerCapture(e.pointerId);
+    const p=pt(st,e); st.cur={color:penColor,width:penWidth,erase:eraser,pts:[p]};
+    e.preventDefault();
+  });
+  sheetEl.addEventListener('pointermove',e=>{
+    if(!drawing||!st.cur) return;
+    if(penOnly && e.pointerType!=='pen') return;
+    const p=pt(st,e); st.cur.pts.push(p); drawSeg(st,st.cur, st.cur.pts.length-2); e.preventDefault();
+  });
+  const end=e=>{ if(!drawing) return; drawing=false;
+    if(st.cur && st.cur.pts.length){ st.strokes.push(st.cur); undoStack.push(i); persist(); }
+    st.cur=null; };
+  sheetEl.addEventListener('pointerup',end);
+  sheetEl.addEventListener('pointercancel',end);
+  sheetEl.addEventListener('pointerleave',end);
+}
+function pt(st,e){ const r=st.canvas.getBoundingClientRect();
+  return {x:e.clientX-r.left, y:e.clientY-r.top, p:(e.pressure&&e.pressure>0)?e.pressure:0.5}; }
+function sizeCanvas(st){ const r=st.el.getBoundingClientRect();
+  st.canvas.width=Math.round(r.width*DPR); st.canvas.height=Math.round(r.height*DPR);
+  st.ctx.setTransform(DPR,0,0,DPR,0,0); redraw(st); }
+function drawSeg(st,stroke,i){ if(i<0) return; const a=stroke.pts[i], b=stroke.pts[i+1]; const ctx=st.ctx;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  if(stroke.erase){ ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=stroke.width*6; }
+  else{ ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=stroke.color; ctx.lineWidth=stroke.width*(0.5+b.p*1.4); }
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+  ctx.globalCompositeOperation='source-over';
+}
+function redraw(st){ st.ctx.clearRect(0,0,st.canvas.width,st.canvas.height);
+  st.strokes.forEach(s=>{ for(let i=0;i<s.pts.length-1;i++) drawSeg(st,s,i); }); }
+
+window.addEventListener('resize',()=>inkState.forEach(sizeCanvas));
+
+/* ============================ TOOLBAR ============================ */
+document.querySelectorAll('.swatch').forEach(sw=>sw.addEventListener('click',()=>{
+  document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('sel')); sw.classList.add('sel');
+  penColor=sw.dataset.c; eraser=false; document.getElementById('eraser').classList.remove('on');
+}));
+document.getElementById('penW').addEventListener('input',e=>penWidth=+e.target.value);
+document.getElementById('eraser').addEventListener('click',e=>{ eraser=!eraser; e.target.classList.toggle('on',eraser); });
+document.getElementById('penToggle').addEventListener('click',e=>{
+  penOnly=!penOnly; e.target.classList.toggle('on',penOnly);
+  e.target.textContent = penOnly? '✎ Pen: S-Pen' : '✎ Pen: Any';
+});
+document.getElementById('clear').addEventListener('click',()=>{
+  const st=topSheet(); if(st && confirm('Clear ink on this page?')){ st.strokes=[]; redraw(st); persist(); }
+});
+document.getElementById('undo').addEventListener('click',doUndo);
+document.getElementById('newday').addEventListener('click',()=>{
+  if(confirm('Start a fresh blank form? Current entries are cleared.')){ localStorage.removeItem(KEY); location.reload(); }
+});
+document.getElementById('save').addEventListener('click',saveShare);
+function doUndo(){ const i=undoStack.pop(); if(i==null) return; const st=inkState[i]; st.strokes.pop(); redraw(st); persist(); }
+function topSheet(){ // sheet most in view
+  let best=null,bd=1e9; inkState.forEach(st=>{ const r=st.el.getBoundingClientRect();
+    const d=Math.abs(r.top); if(r.bottom>0 && d<bd){bd=d;best=st;} }); return best||inkState[0];
+}
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); saveShare(); }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); doUndo(); }
+});
+
+/* ============================ PERSISTENCE ============================ */
+const KEY='inspection-draft-v1';
+let saveTimer=null;
+function persist(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>{
+  const data={ fields:{}, radios:[], ink:[] };
+  document.querySelectorAll('.write').forEach(w=>{ if(w.id) data.fields[w.id]=w.innerText; });
+  document.querySelectorAll('.box.sel').forEach(b=>data.radios.push([b.dataset.item,b.dataset.val]));
+  inkState.forEach(st=>data.ink.push(st.strokes));
+  try{ localStorage.setItem(KEY, JSON.stringify(data)); flash('saved'); }catch(err){ flash('save full'); }
+},400); }
+document.addEventListener('input',e=>{ if(e.target.classList.contains('write')) persist(); });
+function restore(){ let raw; try{ raw=localStorage.getItem(KEY); }catch(e){} if(!raw) return;
+  try{ const d=JSON.parse(raw);
+    for(const id in d.fields){ const w=document.getElementById(id); if(w) w.innerText=d.fields[id]; }
+    (d.radios||[]).forEach(([item,val])=>{ const b=document.querySelector('.box[data-item="'+item+'"][data-val="'+val+'"]'); if(b) b.classList.add('sel'); });
+    (d.ink||[]).forEach((strokes,i)=>{ if(inkState[i]){ inkState[i].strokes=strokes||[]; redraw(inkState[i]); } });
+  }catch(e){}
+}
+function flash(t){ const a=document.getElementById('autosave'); a.textContent=t; }
+
+/* ============================ PDF + SHARE ============================ */
+function slug(s){ return (s||'').trim().replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,40); }
+function fname(){ const d=(document.getElementById('f_date').innerText||'').trim();
+  const date = d? slug(d) : new Date().toISOString().slice(0,10);
+  const proj = slug(document.getElementById('f_project').innerText);
+  return 'Inspection_'+date+(proj?'_'+proj:'')+'.pdf'; }
+
+async function buildPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'letter', compress:true});
+  document.body.classList.add('exporting');
+  const sheetEls=document.querySelectorAll('.sheet');
+  for(let i=0;i<sheetEls.length;i++){
+    const c = await html2canvas(sheetEls[i], {scale:2, backgroundColor:'#ffffff', useCORS:true, logging:false});
+    const img = c.toDataURL('image/jpeg', 0.9);
+    if(i>0) doc.addPage('letter');
+    doc.addImage(img,'JPEG',0,0,612,792,undefined,'FAST');
+  }
+  document.body.classList.remove('exporting');
+  return doc;
+}
+let busy=false;
+async function saveShare(){
+  if(busy) return; busy=true; toast('Building PDF…');
+  try{
+    const doc=await buildPDF(); const blob=doc.output('blob'); const name=fname();
+    const file=new File([blob],name,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:name}); toast('Sent ✓'); busy=false; return; }
+      catch(err){ if(err && err.name==='AbortError'){ busy=false; return; } }
+    }
+    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000); toast('Downloaded ✓');
+  }catch(err){ console.error(err); toast('Error: '+(err.message||err)); document.body.classList.remove('exporting'); }
+  busy=false;
+}
+function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove('show'),2200); }
+
+/* ============================ INIT ============================ */
+restore();
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }
+</script>
+</body>
+</html>
