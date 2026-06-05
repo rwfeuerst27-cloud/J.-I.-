@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.I. - Daily Jobsite Inspection Checklist</title>
+
+    <!-- Base64 Inline Manifest - Fixed double-encoding issue -->
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Daily%20Jobsite%20Inspection%20Checklist%22%2C%22short_name%22%3A%22Jobsite%20Inspection%22%2C%22start_url%22%3A%22.%2Fdaily_inspection.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%23f59e0b%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20width%3D%27192%27%20height%3D%27192%27%3E%3Cpath%20fill%3D%27%23f59e0b%27%20d%3D%27M12%202C6.48%202%202%206.48%202%2012s4.48%2010%2010%2010%2010-4.48%2010-10S17.52%202%2012%202zm1%2015h-2v-6h2v6zm0-8h-2V7h2v2z%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20width%3D%27512%27%20height%3D%27512%27%3E%3Cpath%20fill%3D%27%23f59e0b%27%20d%3D%27M12%202C6.48%202%202%206.48%202%2012s4.48%2010%2010%2010%2010-4.48%2010-10S17.52%202%2012%202zm1%2015h-2v-6h2v6zm0-8h-2V7h2v2z%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+
+    <!-- Tailwind CSS for high-density rendering and responsive layout control -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        construction: {
+                            gold: '#F59E0B',
+                            darkGold: '#D97706',
+                            utilityRed: '#EF4444',
+                            utilityBlue: '#3B82F6',
+                            utilityGreen: '#10B981',
+                            utilityYellow: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* OFFLINE FALLBACK STYLING MATRIX - Active if Tailwind CDN fails to load */
+        body {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+        }
+        #formPanel, #canvasPanel {
+            background-color: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 0.5rem;
+        }
+        .bg-gray-950 { background-color: #020617 !important; }
+        .bg-gray-900 { background-color: #0f172a !important; }
+        .bg-gray-900\/40 { background-color: rgba(15, 23, 42, 0.4) !important; }
+        .border-gray-800 { border-color: #1e293b !important; }
+        .text-amber-500 { color: #f59e0b !important; }
+        .text-rose-400 { color: #f87171 !important; }
+        .text-emerald-400 { color: #34d399 !important; }
+        .bg-amber-500 { background-color: #f59e0b !important; }
+        .text-gray-950 { color: #020617 !important; }
+        .max-w-7xl {
+            max-width: 80rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .grid { display: grid !important; }
+        .grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)) !important; }
+        .lg\:col-span-5 { grid-column: span 5 / span 5 !important; }
+        .lg\:col-span-7 { grid-column: span 7 / span 7 !important; }
+        .lg\:col-span-12 { grid-column: span 12 / span 12 !important; }
+        .flex { display: flex !important; }
+        .flex-col { flex-direction: column !important; }
+        .justify-between { justify-content: space-between !important; }
+        .items-center { align-items: center !important; }
+        .gap-2 { gap: 0.5rem !important; }
+        .p-4 { padding: 1rem !important; }
+        .p-5 { padding: 1.25rem !important; }
+        .rounded-lg { border-radius: 0.5rem !important; }
+        .border { border-width: 1px !important; }
+
+        /* High-precision non-obstructive background grids */
+        .engineering-grid {
+            background-size: 20px 20px;
+            background-image:
+                linear-gradient(to right, rgba(156, 163, 175, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(156, 163, 175, 0.1) 1px, transparent 1px);
+        }
+        .isometric-grid {
+            background-size: 30px 52px;
+            background-image:
+                linear-gradient(30deg, rgba(156, 163, 175, 0.08) 1px, transparent 1px),
+                linear-gradient(150deg, rgba(156, 163, 175, 0.08) 1px, transparent 1px),
+                linear-gradient(270deg, rgba(156, 163, 175, 0.08) 1px, transparent 1px);
+        }
+        /* Disable touch scrolling over drawing surfaces for optimal stylus input */
+        canvas {
+            touch-action: none;
+        }
+        /* High-contrast black and white print stylesheets for regulatory compliance output */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-full {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: white !important;
+                color: black !important;
+            }
+            input, select, textarea {
+                border-bottom: 1px solid #000000 !important;
+                border-top: none !important;
+                border-left: none !important;
+                border-right: none !important;
+                background: transparent !important;
+                color: black !important;
+                border-radius: 0 !important;
+                padding-left: 0 !important;
+            }
+            .checkbox-print-checked {
+                background-color: #000000 !important;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-gray-900">
+
+    <!-- Primary Control Header -->
+    <header class="no-print bg-gray-950 border-b border-gray-800 px-4 py-3 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col xl:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-amber-500 rounded text-gray-950">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-amber-500">J.I. - Jobsite Daily Safety Portal</h1>
+                    <p class="text-xs text-gray-400">Excavation & Underground Pipe Installation Safety Record</p>
+                </div>
+            </div>
+
+            <!-- Global Utilities Panel -->
+            <div class="flex flex-wrap items-center gap-1.5">
+                <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold rounded border border-gray-700 transition flex items-center gap-1">
+                    <span id="langBtnText">ESPAÑOL</span>
+                </button>
+                <button type="button" onclick="saveToLocal()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold rounded border border-gray-700 transition flex items-center gap-1">
+                    <span class="text-emerald-500">✔</span> Save Cache
+                </button>
+                <button type="button" onclick="exportJSONData()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold rounded border border-gray-700 transition flex items-center gap-1">
+                    <span>➔</span> Export JSON
+                </button>
+                <button type="button" onclick="exportAppHTML()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold rounded border border-gray-700 transition flex items-center gap-1" title="Save offline copy of this app">
+                    <span class="text-amber-500">▼</span> Download App (.html)
+                </button>
+                <button type="button" onclick="exportServiceWorker()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold rounded border border-gray-700 transition flex items-center gap-1" title="Download PWA configurations">
+                    <span class="text-sky-400">⚡</span> Save sw.js
+                </button>
+                <button type="button" onclick="triggerPrint()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-gray-950 text-xs font-bold rounded transition flex items-center gap-1">
+                    Print Record
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Layout / Workspace Mode Selection Bar -->
+    <nav class="no-print bg-gray-950 border-b border-gray-800/80 px-4 py-2">
+        <div class="max-w-7xl mx-auto flex gap-2">
+            <button type="button" id="btnViewSplit" onclick="setViewMode('split')" class="px-3 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition">
+                Split View (Default)
+            </button>
+            <button type="button" id="btnViewCanvas" onclick="setViewMode('canvasOnly')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded transition flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                Expand Sketchpad (Full Pen Use)
+            </button>
+            <button type="button" id="btnViewForm" onclick="setViewMode('formOnly')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded transition">
+                Expand Log (Full Form)
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 print-full">
+
+        <!-- Left Panel: Safety & Inspection Form (Lg: 5-Col, expandable) -->
+        <section id="formPanel" class="lg:col-span-5 bg-gray-950 border border-gray-800 rounded-lg p-5 shadow-lg flex flex-col justify-between print-full transition-all duration-300">
+            <div>
+                <!-- Form Document Header -->
+                <div class="border-b border-gray-800 pb-3 mb-4">
+                    <h2 class="text-base font-bold text-gray-100 tracking-tight" data-en="Daily Jobsite Inspection Checklist" data-es="Lista de Verificación Diaria de Inspección de Obra">Daily Jobsite Inspection Checklist</h2>
+                    <p class="text-xs text-amber-500 font-semibold" data-en="Excavation & Underground Pipe Installation" data-es="Excavación e Instalación de Tuberías Subterráneas">Excavation & Underground Pipe Installation</p>
+                </div>
+
+                <!-- Structured Log Inputs - Fixed: Added onsubmit handler to prevent form submission -->
+                <form id="inspectionForm" class="space-y-4" onsubmit="return false;">
+
+                    <!-- 1. General Jobsite Information Block -->
+                    <div class="space-y-3">
+                        <span class="block text-xs font-bold text-amber-500 uppercase tracking-wider" data-en="1. General Jobsite Information" data-es="1. Información General de la Obra">1. General Jobsite Information</span>
+
+                        <div class="space-y-2 bg-gray-900/40 p-3 rounded border border-gray-800">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Project Name" data-es="Nombre del Proyecto">Project Name</label>
+                                <input type="text" id="projName" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Jobsite Location" data-es="Ubicación de la Obra">Jobsite Location</label>
+                                <input type="text" id="jobLocation" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none focus:border-amber-500">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Date of Inspection" data-es="Fecha de Inspección">Date of Inspection</label>
+                                    <input type="date" id="inspectDate" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Time of Inspection" data-es="Hora de Inspección">Time of Inspection</label>
+                                    <input type="time" id="inspectTime" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Inspector (Competent Person)" data-es="Inspector (Persona Competente)">Inspector (Competent Person)</label>
+                                <input type="text" id="inspector" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Superintendent" data-es="Superintendente">Superintendent</label>
+                                    <input type="text" id="superintendent" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Weather Conditions" data-es="Condiciones Climáticas">Weather Conditions</label>
+                                    <input type="text" id="weather" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Key Excavation Details Block -->
+                    <div class="space-y-3">
+                        <span class="block text-xs font-bold text-amber-500 uppercase tracking-wider" data-en="2. Key Excavation Details" data-es="2. Detalles Clave de Excavación">2. Key Excavation Details</span>
+
+                        <div class="bg-gray-900/40 p-3 rounded border border-gray-800 space-y-2">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Max Depth (ft)" data-es="Profundidad Máx (pies)">Max Depth (ft)</label>
+                                    <input type="text" id="maxDepth" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Max Width (ft)" data-es="Ancho Máx (pies)">Max Width (ft)</label>
+                                    <input type="text" id="maxWidth" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Soil Type" data-es="Tipo de Suelo">Soil Type</label>
+                                    <select id="soilType" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                                        <option value="Type A">Type A (Cohesive)</option>
+                                        <option value="Type B">Type B (Silt/Loam)</option>
+                                        <option value="Type C">Type C (Granular)</option>
+                                        <option value="Solid Rock">Solid Rock</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Protective System" data-es="Sistema de Protección">Protective System</label>
+                                    <input type="text" id="protectiveSystem" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none" placeholder="e.g. Trench Box/Shield">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Spoil Pile Location (distance from edge)" data-es="Ubicación de Pilas de Tierra (distancia al borde)">Spoil Pile Location (distance from edge)</label>
+                                <input type="text" id="spoilPile" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none" placeholder="Must be >= 2 ft">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Safety & Compliance Checklist (Fully Clickable Click-pad) -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="block text-xs font-bold text-amber-500 uppercase tracking-wider" data-en="3. Safety & Compliance Checklist" data-es="3. Lista de Seguridad y Cumplimiento">3. Safety & Compliance Checklist</span>
+                            <span class="text-[9px] text-gray-500" data-en="*Click row to select status" data-es="*Haga clic para seleccionar">*Click to select</span>
+                        </div>
+
+                        <!-- High density table structures -->
+                        <div class="bg-gray-950 border border-gray-800 rounded-lg overflow-hidden">
+                            <div class="grid grid-cols-12 bg-gray-900 border-b border-gray-800 p-2 text-[10px] font-bold uppercase text-gray-400 tracking-wide">
+                                <div class="col-span-8 flex items-center" data-en="Inspection Item" data-es="Elemento de Inspección">Inspection Item</div>
+                                <div class="col-span-4 grid grid-cols-3 text-center">
+                                    <span class="text-emerald-500">OK</span>
+                                    <span class="text-gray-400">N/A</span>
+                                    <span class="text-rose-500">D</span>
+                                </div>
+                            </div>
+
+                            <!-- Checklist Rows Parent container -->
+                            <div id="checklistRowsContainer" class="divide-y divide-gray-800 max-h-[350px] overflow-y-auto">
+                                <!-- Dynamic rows rendered programmatically by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Notes & Corrective Actions Block -->
+                    <div class="space-y-3">
+                        <span class="block text-xs font-bold text-amber-500 uppercase tracking-wider" data-en="4. Notes & Corrective Actions" data-es="4. Notas y Acciones Correctivas">4. Notes & Corrective Actions</span>
+                        <div class="bg-gray-900/40 p-3 rounded border border-gray-800">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1" data-en="Observations/Notes (e.g., specify 'D' items)" data-es="Observaciones/Notas (ej. detallar ítems 'D')">Observations / Notes (e.g., specify "D" items)</label>
+                            <textarea id="observations" rows="4" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-amber-500" placeholder="Enter deficiencies, modifications, corrective steps..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 5. Signature Panel -->
+                    <div class="space-y-3">
+                        <span class="block text-xs font-bold text-amber-500 uppercase tracking-wider" data-en="5. Signature Verification" data-es="5. Firma de Verificación">5. Signature Verification</span>
+                        <div class="bg-gray-900/40 p-3 rounded border border-gray-800 space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1" data-en="Printed Name" data-es="Nombre en Imprenta">Print Name</label>
+                                <input type="text" id="printSignName" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1" data-en="Date" data-es="Fecha">Date</label>
+                                <input type="date" id="signDate" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none">
+                            </div>
+
+                            <!-- Digital Signature Drawing area -->
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide" data-en="Inspector/Superintendent Signature" data-es="Firma de Inspector/Superintendente">Inspector / Superintendent Signature</label>
+                                    <button type="button" onclick="clearSignatureCanvas()" class="text-[9px] text-rose-500 font-bold hover:underline">Clear Signature</button>
+                                </div>
+                                <div class="border border-gray-800 bg-gray-950 rounded h-24 overflow-hidden relative">
+                                    <canvas id="signatureCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Panel: Sketchpad Canvas (Lg: 7-Col, expandable) -->
+        <section id="canvasPanel" class="lg:col-span-7 bg-gray-950 border border-gray-800 rounded-lg p-4 shadow-lg flex flex-col justify-between print-full transition-all duration-300">
+
+            <!-- Sketchpad Command Header -->
+            <div class="no-print flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-gray-800">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider" data-en="Drawing & Profiling Sketchpad" data-es="Panel de Dibujo y Perfiles">Drawing Sketchpad</span>
+                    <div class="flex items-center gap-1 bg-gray-900 px-2 py-0.5 rounded text-[10px]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                        <span id="pressureIndicator" class="font-mono text-gray-400">Stylus Active</span>
+                    </div>
+                </div>
+
+                <!-- Pen Tool Settings -->
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="btnToolPen" onclick="selectTool('pen')" class="px-2.5 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        <span data-en="Pen" data-es="Pluma">Pen</span>
+                    </button>
+                    <button type="button" id="btnToolHighlighter" onclick="selectTool('highlighter')" class="px-2.5 py-1 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 text-xs rounded transition flex items-center gap-1">
+                        <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.42l5.33 5.33m-5.33-6.75l5.33-5.33a1 1 0 111.41 1.41l-5.33 5.33m-1.41 0H9m1.2 2.4l-5.33 5.33a1 1 0 01-1.41 0l-.7-.7a1 1 0 010-1.41l5.33-5.33m0 2.11H12"></path></svg>
+                        <span data-en="Highlight" data-es="Resaltar">Highlight</span>
+                    </button>
+                    <button type="button" id="btnToolEraser" onclick="selectTool('eraser')" class="px-2.5 py-1 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 text-xs rounded transition flex items-center gap-1">
+                        <svg class="w-3 h-3 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <span data-en="Eraser" data-es="Borrador">Eraser</span>
+                    </button>
+
+                    <!-- Background Grid Switcher - Fixed: Added id for language updates -->
+                    <select id="gridStyleSelect" onchange="setGridStyle(this.value)" class="bg-gray-900 border border-gray-800 text-xs text-gray-200 rounded px-2 py-1 focus:outline-none">
+                        <option value="none" data-en="No Grid" data-es="Plano">No Grid</option>
+                        <option value="engineering" selected data-en="Engineering" data-es="Ingeniería">Engineering Grid</option>
+                        <option value="isometric" data-en="Isometric" data-es="Isométrica">Isometric Grid</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- APWA/Underground Safety Color Selectors -->
+            <div class="no-print flex flex-wrap gap-2 items-center justify-between py-2 border-b border-gray-800/60">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider" data-en="APWA Safety Color:" data-es="Color APWA:">APWA Safety Color:</span>
+                    <button type="button" onclick="setInkColor('#ffffff')" class="w-5 h-5 rounded-full border border-gray-700 bg-white" title="White - Proposed Excavation Limits"></button>
+                    <button type="button" onclick="setInkColor('#EF4444')" class="w-5 h-5 rounded-full border border-gray-700 bg-red-500" title="Red - Power / Electric"></button>
+                    <button type="button" onclick="setInkColor('#F59E0B')" class="w-5 h-5 rounded-full border border-gray-700 bg-amber-500" title="Yellow - Gas / Petroleum / Steam"></button>
+                    <button type="button" onclick="setInkColor('#3B82F6')" class="w-5 h-5 rounded-full border border-gray-700 bg-blue-500" title="Blue - Water Main"></button>
+                    <button type="button" onclick="setInkColor('#10B981')" class="w-5 h-5 rounded-full border border-gray-700 bg-emerald-500" title="Green - Sewer / Drainage"></button>
+                    <button type="button" onclick="setInkColor('#A855F7')" class="w-5 h-5 rounded-full border border-gray-700 bg-purple-500" title="Purple - Reclaimed Water / Slurry"></button>
+                </div>
+
+                <!-- Weight Controls -->
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-gray-500 font-semibold uppercase" data-en="Size:" data-es="Tamaño:">Size:</span>
+                    <input type="range" id="inkWeight" min="1" max="20" value="3" onchange="updateInkWeight(this.value)" class="w-20 accent-amber-500 h-1 bg-gray-800 rounded-lg cursor-pointer">
+                    <span id="weightVal" class="text-xs font-mono text-gray-400">3px</span>
+                </div>
+
+                <!-- Step Histology controls - Fixed: Corrected undo/redo SVG icons -->
+                <div class="flex items-center gap-1">
+                    <button type="button" onclick="undo()" class="p-1 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded transition text-gray-400 hover:text-gray-100" title="Undo Sketch">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2M3 10l4-4m-4 4l4 4"></path>
+                        </svg>
+                    </button>
+                    <button type="button" onclick="redo()" class="p-1 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded transition text-gray-400 hover:text-gray-100" title="Redo Sketch">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a5 5 0 00-5 5v2m15-7l-4-4m4 4l-4 4"></path>
+                        </svg>
+                    </button>
+                    <button type="button" onclick="clearCanvasPrompt()" class="px-2 py-1 bg-rose-950/40 hover:bg-rose-950 border border-rose-900/50 text-rose-300 hover:text-rose-100 text-xs font-semibold rounded transition" data-en="Clear All" data-es="Borrar Todo">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Drawing Element Container - Fixed: border-gray-850 to border-gray-800 -->
+            <div id="canvasContainer" class="relative flex-grow min-h-[480px] md:min-h-[600px] bg-gray-900 rounded border border-gray-800 mt-3 overflow-hidden shadow-inner print:border-black print:bg-white transition-all duration-300">
+                <div id="gridBackground" class="absolute inset-0 engineering-grid pointer-events-none opacity-40 print:opacity-20"></div>
+                <canvas id="drawingCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+            </div>
+
+            <div class="no-print mt-3 flex justify-between items-center text-[10px] text-gray-500">
+                <span data-en="S-Pen calibrated with real-time vector path serialization." data-es="S-Pen calibrado con serialización de vectores en tiempo real.">S-Pen calibrated with real-time vector path serialization.</span>
+                <span class="font-mono text-gray-400">Offline Local Matrix</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Notifications -->
+    <div id="customModal" class="fixed inset-0 bg-gray-950/85 backdrop-blur-sm hidden z-50 items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-lg max-w-md w-full p-6 shadow-2xl">
+            <h3 id="modalTitle" class="text-lg font-bold text-amber-500">Notice</h3>
+            <p id="modalBody" class="text-sm text-gray-300 mt-2">Details go here.</p>
+            <div class="mt-5 flex justify-end gap-3">
+                <button type="button" id="modalSecondaryBtn" onclick="closeModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded transition">Cancel</button>
+                <button type="button" id="modalPrimaryBtn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-gray-950 text-xs font-bold rounded transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Persistent Bottom Bar -->
+    <footer class="no-print bg-gray-950 border-t border-gray-800 px-4 py-3 text-xs text-center text-gray-400">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div>
+                <span>Compliance Verification System: OSHA Standard 1926 Subpart P & Associated Utilities Markings.</span>
+            </div>
+            <div>
+                <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded font-mono">Local Data Layer Isolation</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic Controller Core Script Block -->
+    <script>
+        let currentLanguage = 'en';
+        let activeTool = 'pen';
+        let strokeColor = '#F59E0B'; // Safety Orange/Yellow default
+        let baseStrokeWeight = 3;
+        let isDrawing = false;
+
+        // Fixed: Store strokes with normalized coordinates (0-1 range)
+        let strokesHistory = [];
+        let deletedStrokesStack = [];
+        let currentStrokePoints = [];
+
+        // Fixed: Track last canvas dimensions for coordinate scaling
+        let lastCanvasWidth = 0;
+        let lastCanvasHeight = 0;
+
+        // Dual-canvas targets
+        const mainCanvas = document.getElementById('drawingCanvas');
+        const mainCtx = mainCanvas.getContext('2d');
+        const sigCanvas = document.getElementById('signatureCanvas');
+        const sigCtx = sigCanvas.getContext('2d');
+        const gridBackground = document.getElementById('gridBackground');
+        const pressureIndicator = document.getElementById('pressureIndicator');
+
+        // Layout View Configurations
+        let activeViewMode = 'split';
+
+        // 24 Strict Safety Checklist items taken directly from PDF Page 2
+        const checklistItems = [
+            { id: 1, textEn: "Excavation walls stable?", textEs: "¿Paredes de excavación estables?" },
+            { id: 2, textEn: "Safe access/egress within 25 ft?", textEs: "¿Acceso/egreso seguro dentro de 25 pies?" },
+            { id: 3, textEn: "Spoil piles 2 ft from edge?", textEs: "¿Pilas de material a 2 pies del borde?" },
+            { id: 4, textEn: "Underground utilities located/marked?", textEs: "¿Servicios subterráneos ubicados/marcados?" },
+            { id: 5, textEn: "Overhead utilities clearances maintained?", textEs: "¿Distancias de seguridad a líneas aéreas mantenidas?" },
+            { id: 6, textEn: "Hazardous atmosphere tested (if applicable)?", textEs: "¿Atmósfera peligrosa probada? (si aplica)" },
+            { id: 7, textEn: "Ventilation adequate (if applicable)?", textEs: "¿Ventilación adecuada? (si aplica)" },
+            { id: 8, textEn: "Fall protection for >6ft excavations (if applicable)?", textEs: "¿Protección contra caídas para excavaciones >6 pies? (si aplica)" },
+            { id: 9, textEn: "Traffic control in place?", textEs: "¿Control de tráfico instalado/activo?" },
+            { id: 10, textEn: "Workers using required PPE?", textEs: "¿Trabajadores usando el EPP requerido?" },
+            { id: 11, textEn: "Competent Person on site/inspecting?", textEs: "¿Persona Competente en obra/inspeccionando?" },
+            { id: 12, textEn: "Emergency equipment available?", textEs: "¿Equipo de emergencia disponible?" },
+            { id: 13, textEn: "Confined space entry procedures followed (if applicable)?", textEs: "¿Procedimientos de espacio confinado seguidos? (si aplica)" },
+            { id: 14, textEn: "Heavy equipment operating safely/clearances?", textEs: "¿Operación segura de maquinaria pesada/distancias?" },
+            { id: 15, textEn: "Trench box/shoring good condition/installed?", textEs: "¿Caja de zanja/blindaje en buen estado e instalado?" },
+            { id: 16, textEn: "Water accumulation controlled?", textEs: "¿Acumulación de agua controlada?" },
+            { id: 17, textEn: "Heavy equipment inspected daily?", textEs: "¿Maquinaria pesada inspeccionada diariamente?" },
+            { id: 18, textEn: "Hand tools good condition?", textEs: "¿Herramientas de mano en buen estado?" },
+            { id: 19, textEn: "Lifting equipment inspected/good condition?", textEs: "¿Equipo de izaje inspeccionado/buen estado?" },
+            { id: 20, textEn: "Electrical cords/tools good condition/grounded?", textEs: "¿Cables/herramientas eléctricas en buen estado/conectadas a tierra?" },
+            { id: 21, textEn: "Pipe stored securely/clear pathways?", textEs: "¿Tubería almacenada de forma segura/vías despejadas?" },
+            { id: 22, textEn: "Pipe lifting/handling procedures followed?", textEs: "¿Procedimientos de elevación/manipulación de tubería seguidos?" },
+            { id: 23, textEn: "Trench bedding properly prepared?", textEs: "¿Cama de zanja preparada adecuadamente?" },
+            { id: 24, textEn: "Backfill/compaction appropriate?", textEs: "¿Relleno/compactación adecuados?" }
+        ];
+
+        // Object holding active checklist state - Fixed: Use string keys consistently
+        let checklistState = {};
+
+        // Fixed: Signature strokes array (multiple strokes support)
+        let signatureStrokes = [];
+        let currentSignatureStroke = [];
+        let isSigning = false;
+
+        // Window load setup
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeChecklistUI();
+
+            // Preset dates to current timestamp automatically
+            const today = new Date();
+            document.getElementById('inspectDate').valueAsDate = today;
+            document.getElementById('signDate').valueAsDate = today;
+
+            const hours = String(today.getHours()).padStart(2, '0');
+            const minutes = String(today.getMinutes()).padStart(2, '0');
+            document.getElementById('inspectTime').value = `${hours}:${minutes}`;
+
+            // Handle Scaling
+            initializeCanvasScaling();
+
+            // Local Cache Restoration
+            loadFromLocal();
+
+            // Set up stylus input bindings for both drawing and signature capture
+            setupPointerListeners();
+            setupSignatureListeners();
+
+            // Fixed: PWA Service Worker Registration with existence check
+            if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+                // Check if sw.js exists before attempting registration
+                fetch('./sw.js', { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            navigator.serviceWorker.register('./sw.js')
+                                .then(reg => console.log('Service Worker Registered Successfully for scope:', reg.scope))
+                                .catch(err => console.log('Service Worker Registration failed:', err));
+                        } else {
+                            console.log('Service Worker file not found. Use "Save sw.js" button to download it.');
+                        }
+                    })
+                    .catch(() => {
+                        console.log('Service Worker check skipped (offline or file not available).');
+                    });
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            initializeCanvasScaling();
+        });
+
+        // Toggle visual workspace modes to "remove frame and expand for easier pen use"
+        function setViewMode(mode) {
+            activeViewMode = mode;
+            const formPanel = document.getElementById('formPanel');
+            const canvasPanel = document.getElementById('canvasPanel');
+
+            // Reset configurations - Fixed: Changed bg-gray-850 to bg-gray-800
+            document.getElementById('btnViewSplit').className = "px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded transition";
+            document.getElementById('btnViewCanvas').className = "px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded transition flex items-center gap-1";
+            document.getElementById('btnViewForm').className = "px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded transition";
+
+            if (mode === 'split') {
+                document.getElementById('btnViewSplit').className = "px-3 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition";
+                formPanel.className = "lg:col-span-5 bg-gray-950 border border-gray-800 rounded-lg p-5 shadow-lg flex flex-col justify-between print-full transition-all duration-300 block";
+                canvasPanel.className = "lg:col-span-7 bg-gray-950 border border-gray-800 rounded-lg p-4 shadow-lg flex flex-col justify-between print-full transition-all duration-300 block";
+            } else if (mode === 'canvasOnly') {
+                document.getElementById('btnViewCanvas').className = "px-3 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition flex items-center gap-1";
+                formPanel.className = "hidden";
+                canvasPanel.className = "lg:col-span-12 bg-gray-950 border border-gray-800 rounded-lg p-4 shadow-lg flex flex-col justify-between print-full transition-all duration-300 block";
+            } else if (mode === 'formOnly') {
+                document.getElementById('btnViewForm').className = "px-3 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition";
+                formPanel.className = "lg:col-span-12 bg-gray-950 border border-gray-800 rounded-lg p-5 shadow-lg flex flex-col justify-between print-full transition-all duration-300 block";
+                canvasPanel.className = "hidden";
+            }
+
+            // Adjust canvas dimension matrix instantly
+            setTimeout(initializeCanvasScaling, 50);
+        }
+
+        // Initialize Checklist UI programmatically to make rows fully interactive/clickable
+        function initializeChecklistUI() {
+            const container = document.getElementById('checklistRowsContainer');
+            container.innerHTML = '';
+
+            checklistItems.forEach(item => {
+                // Fixed: Use string keys consistently
+                const itemKey = String(item.id);
+                if (!checklistState[itemKey]) {
+                    checklistState[itemKey] = null; // Unchecked
+                }
+
+                const rowDiv = document.createElement('div');
+                rowDiv.className = "grid grid-cols-12 p-2 hover:bg-gray-900/50 cursor-pointer transition select-none items-center";
+                rowDiv.id = `checkRow-${item.id}`;
+                rowDiv.onclick = (e) => handleRowClick(item.id, e);
+
+                rowDiv.innerHTML = `
+                    <div class="col-span-8 pr-2">
+                        <p class="text-xs font-medium text-gray-100" data-row-en="${item.textEn}" data-row-es="${item.textEs}">
+                            ${currentLanguage === 'en' ? item.textEn : item.textEs}
+                        </p>
+                    </div>
+                    <div class="col-span-4 grid grid-cols-3 text-center gap-1">
+                        <button type="button" onclick="event.stopPropagation(); setItemStatus(${item.id}, 'OK')" id="btn-ok-${item.id}" class="py-1 text-xs rounded font-bold border border-gray-800 hover:border-emerald-500 text-gray-500 transition">OK</button>
+                        <button type="button" onclick="event.stopPropagation(); setItemStatus(${item.id}, 'N/A')" id="btn-na-${item.id}" class="py-1 text-xs rounded font-bold border border-gray-800 hover:border-gray-500 text-gray-500 transition">N/A</button>
+                        <button type="button" onclick="event.stopPropagation(); setItemStatus(${item.id}, 'D')" id="btn-d-${item.id}" class="py-1 text-xs rounded font-bold border border-gray-800 hover:border-rose-500 text-gray-500 transition">D</button>
+                    </div>
+                `;
+                container.appendChild(rowDiv);
+            });
+        }
+
+        // Clicking a row cycles statuses: OK -> N/A -> D -> unselected
+        function handleRowClick(id, event) {
+            const itemKey = String(id);
+            const current = checklistState[itemKey];
+            let next = 'OK';
+            if (current === 'OK') next = 'N/A';
+            else if (current === 'N/A') next = 'D';
+            else if (current === 'D') next = null;
+
+            setItemStatus(id, next);
+        }
+
+        // Set particular checklist state
+        function setItemStatus(id, status) {
+            const itemKey = String(id);
+            checklistState[itemKey] = status;
+
+            // Reset visual states
+            const btnOk = document.getElementById(`btn-ok-${id}`);
+            const btnNa = document.getElementById(`btn-na-${id}`);
+            const btnD = document.getElementById(`btn-d-${id}`);
+            const rowDiv = document.getElementById(`checkRow-${id}`);
+
+            btnOk.className = "py-0.5 text-xs rounded font-bold border border-gray-800 text-gray-500 hover:border-emerald-500 transition";
+            btnNa.className = "py-0.5 text-xs rounded font-bold border border-gray-800 text-gray-500 hover:border-gray-500 transition";
+            btnD.className = "py-0.5 text-xs rounded font-bold border border-gray-800 text-gray-500 hover:border-rose-500 transition";
+            rowDiv.className = "grid grid-cols-12 p-2 hover:bg-gray-900/50 cursor-pointer transition select-none items-center";
+
+            if (status === 'OK') {
+                btnOk.className = "py-0.5 text-xs rounded font-bold border border-emerald-500 bg-emerald-950/30 text-emerald-400";
+                rowDiv.className = "grid grid-cols-12 p-2 bg-emerald-950/10 hover:bg-emerald-950/20 cursor-pointer transition select-none items-center border-l-2 border-emerald-500";
+            } else if (status === 'N/A') {
+                btnNa.className = "py-0.5 text-xs rounded font-bold border border-gray-600 bg-gray-800/30 text-gray-300";
+            } else if (status === 'D') {
+                btnD.className = "py-0.5 text-xs rounded font-bold border border-rose-500 bg-rose-950/30 text-rose-400";
+                rowDiv.className = "grid grid-cols-12 p-2 bg-rose-950/10 hover:bg-rose-950/20 cursor-pointer transition select-none items-center border-l-2 border-rose-500";
+            }
+        }
+
+        // Synchronize and scale canvases to correct dimensional metrics
+        function initializeCanvasScaling() {
+            const rect = mainCanvas.parentNode.getBoundingClientRect();
+            mainCanvas.width = rect.width;
+            mainCanvas.height = rect.height;
+            lastCanvasWidth = rect.width;
+            lastCanvasHeight = rect.height;
+            redrawCanvasVectors();
+
+            // Handle Signature Canvas
+            const sRect = sigCanvas.parentNode.getBoundingClientRect();
+            sigCanvas.width = sRect.width;
+            sigCanvas.height = sRect.height;
+            redrawSignatureCanvas();
+        }
+
+        // Active S-Pen Vector Listener Implementation
+        function setupPointerListeners() {
+            mainCanvas.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                mainCanvas.setPointerCapture(e.pointerId);
+                isDrawing = true;
+                deletedStrokesStack = [];
+
+                // Fixed: Store normalized coordinates (0-1 range)
+                const pt = getNormalizedCanvasCoords(e, mainCanvas);
+                currentStrokePoints = [pt];
+                updateStylusPressure(e.pressure);
+            });
+
+            mainCanvas.addEventListener('pointermove', (e) => {
+                if (!isDrawing) return;
+                e.preventDefault();
+
+                // Fixed: Store normalized coordinates
+                const pt = getNormalizedCanvasCoords(e, mainCanvas);
+                currentStrokePoints.push(pt);
+                updateStylusPressure(e.pressure);
+
+                drawInteractivePreview();
+            });
+
+            mainCanvas.addEventListener('pointerup', (e) => {
+                if (!isDrawing) return;
+                e.preventDefault();
+                mainCanvas.releasePointerCapture(e.pointerId);
+                isDrawing = false;
+
+                if (currentStrokePoints.length > 0) {
+                    strokesHistory.push({
+                        points: currentStrokePoints,
+                        tool: activeTool,
+                        color: strokeColor,
+                        weight: baseStrokeWeight
+                    });
+                }
+                currentStrokePoints = [];
+                pressureIndicator.textContent = "Stylus Active";
+                redrawCanvasVectors();
+            });
+
+            mainCanvas.addEventListener('pointercancel', () => {
+                isDrawing = false;
+                currentStrokePoints = [];
+                redrawCanvasVectors();
+            });
+        }
+
+        // Fixed: Capture stylus signatures with multi-stroke support
+        function setupSignatureListeners() {
+            sigCanvas.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                sigCanvas.setPointerCapture(e.pointerId);
+                isSigning = true;
+                const pt = getNormalizedCanvasCoords(e, sigCanvas);
+                currentSignatureStroke = [pt];
+            });
+
+            sigCanvas.addEventListener('pointermove', (e) => {
+                if (!isSigning) return;
+                e.preventDefault();
+                const pt = getNormalizedCanvasCoords(e, sigCanvas);
+                currentSignatureStroke.push(pt);
+                redrawSignatureCanvas();
+            });
+
+            sigCanvas.addEventListener('pointerup', (e) => {
+                if (!isSigning) return;
+                e.preventDefault();
+                sigCanvas.releasePointerCapture(e.pointerId);
+                isSigning = false;
+
+                // Fixed: Save completed stroke to strokes array
+                if (currentSignatureStroke.length > 0) {
+                    signatureStrokes.push([...currentSignatureStroke]);
+                }
+                currentSignatureStroke = [];
+            });
+
+            sigCanvas.addEventListener('pointercancel', () => {
+                isSigning = false;
+                currentSignatureStroke = [];
+            });
+        }
+
+        // Fixed: Redraw all signature strokes
+        function redrawSignatureCanvas() {
+            sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+            sigCtx.strokeStyle = "#FFFFFF";
+            sigCtx.lineWidth = 2;
+            sigCtx.lineCap = "round";
+            sigCtx.lineJoin = "round";
+
+            // Draw all saved strokes
+            for (const stroke of signatureStrokes) {
+                drawSignatureStroke(stroke);
+            }
+
+            // Draw current stroke being drawn
+            if (currentSignatureStroke.length > 0) {
+                drawSignatureStroke(currentSignatureStroke);
+            }
+        }
+
+        // Fixed: Draw a single signature stroke with scaling
+        function drawSignatureStroke(strokePoints) {
+            if (strokePoints.length < 1) return;
+
+            if (strokePoints.length === 1) {
+                const x = strokePoints[0].x * sigCanvas.width;
+                const y = strokePoints[0].y * sigCanvas.height;
+                sigCtx.beginPath();
+                sigCtx.arc(x, y, 1, 0, Math.PI * 2);
+                sigCtx.fillStyle = "#FFFFFF";
+                sigCtx.fill();
+            } else {
+                sigCtx.beginPath();
+                sigCtx.moveTo(strokePoints[0].x * sigCanvas.width, strokePoints[0].y * sigCanvas.height);
+                for (let i = 1; i < strokePoints.length; i++) {
+                    sigCtx.lineTo(strokePoints[i].x * sigCanvas.width, strokePoints[i].y * sigCanvas.height);
+                }
+                sigCtx.stroke();
+            }
+        }
+
+        // Fixed: Clear signature canvas and all strokes
+        function clearSignatureCanvas() {
+            sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+            signatureStrokes = [];
+            currentSignatureStroke = [];
+        }
+
+        // Pressure logging
+        function updateStylusPressure(pressure) {
+            if (pressure && pressure > 0 && pressure !== 0.5) {
+                const percent = Math.round(pressure * 100);
+                pressureIndicator.textContent = `S-Pen Pressure: ${percent}%`;
+                pressureIndicator.className = "font-mono text-emerald-400";
+            } else {
+                pressureIndicator.textContent = "Stylus Calibrated";
+                pressureIndicator.className = "font-mono text-gray-500";
+            }
+        }
+
+        // Fixed: Get normalized coordinates (0-1 range) for resolution-independent storage
+        function getNormalizedCanvasCoords(e, canvasObj) {
+            const rect = canvasObj.getBoundingClientRect();
+            return {
+                x: (e.clientX - rect.left) / rect.width,
+                y: (e.clientY - rect.top) / rect.height,
+                pressure: e.pressure || 0.5
+            };
+        }
+
+        function redrawCanvasVectors() {
+            mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            for (let i = 0; i < strokesHistory.length; i++) {
+                renderStroke(strokesHistory[i]);
+            }
+        }
+
+        // Fixed: Render stroke with coordinate scaling
+        function renderStroke(stroke) {
+            if (stroke.points.length < 1) return;
+
+            mainCtx.beginPath();
+            mainCtx.lineCap = 'round';
+            mainCtx.lineJoin = 'round';
+
+            if (stroke.tool === 'eraser') {
+                mainCtx.globalCompositeOperation = 'destination-out';
+                mainCtx.strokeStyle = 'rgba(0,0,0,1)';
+                mainCtx.lineWidth = stroke.weight * 5;
+            } else if (stroke.tool === 'highlighter') {
+                mainCtx.globalCompositeOperation = 'source-over';
+                mainCtx.strokeStyle = hexToRGBA(stroke.color, 0.4);
+                mainCtx.lineWidth = stroke.weight * 6;
+            } else {
+                mainCtx.globalCompositeOperation = 'source-over';
+                mainCtx.strokeStyle = stroke.color;
+                mainCtx.lineWidth = stroke.weight;
+            }
+
+            // Fixed: Scale normalized coordinates to current canvas size
+            const scaleX = mainCanvas.width;
+            const scaleY = mainCanvas.height;
+
+            if (stroke.points.length === 1) {
+                const x = stroke.points[0].x * scaleX;
+                const y = stroke.points[0].y * scaleY;
+                mainCtx.arc(x, y, mainCtx.lineWidth / 2, 0, Math.PI * 2);
+                mainCtx.fillStyle = mainCtx.strokeStyle;
+                mainCtx.fill();
+            } else {
+                const firstX = stroke.points[0].x * scaleX;
+                const firstY = stroke.points[0].y * scaleY;
+                mainCtx.moveTo(firstX, firstY);
+
+                for (let j = 1; j < stroke.points.length; j++) {
+                    const currX = stroke.points[j].x * scaleX;
+                    const currY = stroke.points[j].y * scaleY;
+                    const prevX = stroke.points[j - 1].x * scaleX;
+                    const prevY = stroke.points[j - 1].y * scaleY;
+                    const xc = (currX + prevX) / 2;
+                    const yc = (currY + prevY) / 2;
+
+                    if (stroke.tool === 'pen' && stroke.points[j].pressure > 0 && stroke.points[j].pressure !== 0.5) {
+                        mainCtx.lineWidth = stroke.weight * (stroke.points[j].pressure * 2.0);
+                    }
+                    mainCtx.quadraticCurveTo(prevX, prevY, xc, yc);
+                }
+                mainCtx.stroke();
+            }
+            mainCtx.globalCompositeOperation = 'source-over';
+        }
+
+        function drawInteractivePreview() {
+            redrawCanvasVectors();
+            if (currentStrokePoints.length > 0) {
+                renderStroke({
+                    points: currentStrokePoints,
+                    tool: activeTool,
+                    color: strokeColor,
+                    weight: baseStrokeWeight
+                });
+            }
+        }
+
+        function hexToRGBA(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function selectTool(tool) {
+            activeTool = tool;
+            document.getElementById('btnToolPen').className = "px-2.5 py-1 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 text-xs rounded transition flex items-center gap-1";
+            document.getElementById('btnToolHighlighter').className = "px-2.5 py-1 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 text-xs rounded transition flex items-center gap-1";
+            document.getElementById('btnToolEraser').className = "px-2.5 py-1 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 text-xs rounded transition flex items-center gap-1";
+
+            if (tool === 'pen') {
+                document.getElementById('btnToolPen').className = "px-2.5 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition flex items-center gap-1";
+            } else if (tool === 'highlighter') {
+                document.getElementById('btnToolHighlighter').className = "px-2.5 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition flex items-center gap-1";
+            } else if (tool === 'eraser') {
+                document.getElementById('btnToolEraser').className = "px-2.5 py-1 bg-amber-500 text-gray-950 font-bold text-xs rounded transition flex items-center gap-1";
+            }
+        }
+
+        function setInkColor(color) {
+            strokeColor = color;
+            if (activeTool === 'eraser') {
+                selectTool('pen');
+            }
+        }
+
+        function updateInkWeight(val) {
+            baseStrokeWeight = parseInt(val);
+            document.getElementById('weightVal').textContent = `${val}px`;
+        }
+
+        function undo() {
+            if (strokesHistory.length > 0) {
+                deletedStrokesStack.push(strokesHistory.pop());
+                redrawCanvasVectors();
+            }
+        }
+
+        // Redo action
+        function redo() {
+            if (deletedStrokesStack.length > 0) {
+                strokesHistory.push(deletedStrokesStack.pop());
+                redrawCanvasVectors();
+            }
+        }
+
+        function clearCanvasPrompt() {
+            openModal(
+                "Permanently Clear Sketchpad?",
+                "This action clears all existing profiles and markings. This cannot be undone.",
+                "Erase Sketch",
+                () => {
+                    strokesHistory = [];
+                    deletedStrokesStack = [];
+                    redrawCanvasVectors();
+                    closeModal();
+                }
+            );
+        }
+
+        function setGridStyle(style) {
+            gridBackground.className = "absolute inset-0 pointer-events-none opacity-40 print:opacity-20";
+            if (style === 'engineering') {
+                gridBackground.classList.add('engineering-grid');
+            } else if (style === 'isometric') {
+                gridBackground.classList.add('isometric-grid');
+            }
+        }
+
+        // Fixed: Spanish On-Site Translations including select options
+        function toggleLanguage() {
+            currentLanguage = (currentLanguage === 'en') ? 'es' : 'en';
+            document.getElementById('langBtnText').textContent = (currentLanguage === 'en') ? 'ESPAÑOL' : 'ENGLISH';
+
+            // Update elements with data-en/data-es attributes
+            const elements = document.querySelectorAll('[data-en]');
+            elements.forEach(el => {
+                el.textContent = el.getAttribute(`data-${currentLanguage}`);
+            });
+
+            // Fixed: Update select option text properly
+            const gridSelect = document.getElementById('gridStyleSelect');
+            const options = gridSelect.querySelectorAll('option');
+            options.forEach(opt => {
+                if (opt.hasAttribute('data-en')) {
+                    opt.textContent = opt.getAttribute(`data-${currentLanguage}`);
+                }
+            });
+
+            // Refresh checklist text
+            checklistItems.forEach(item => {
+                const textEl = document.querySelector(`[data-row-en="${item.textEn}"]`);
+                if (textEl) {
+                    textEl.textContent = currentLanguage === 'en' ? item.textEn : item.textEs;
+                }
+            });
+        }
+
+        // Local Storage Hydration Schema
+        function compileDataPayload() {
+            return {
+                projectInformation: {
+                    projName: document.getElementById('projName').value,
+                    jobLocation: document.getElementById('jobLocation').value,
+                    inspectDate: document.getElementById('inspectDate').value,
+                    inspectTime: document.getElementById('inspectTime').value,
+                    inspector: document.getElementById('inspector').value,
+                    superintendent: document.getElementById('superintendent').value,
+                    weather: document.getElementById('weather').value
+                },
+                excavationDetails: {
+                    maxDepth: document.getElementById('maxDepth').value,
+                    maxWidth: document.getElementById('maxWidth').value,
+                    soilType: document.getElementById('soilType').value,
+                    protectiveSystem: document.getElementById('protectiveSystem').value,
+                    spoilPile: document.getElementById('spoilPile').value
+                },
+                checklist: checklistState,
+                observations: document.getElementById('observations').value,
+                signatureBlock: {
+                    printSignName: document.getElementById('printSignName').value,
+                    signDate: document.getElementById('signDate').value,
+                    // Fixed: Store all signature strokes
+                    signatureStrokesSerialized: signatureStrokes
+                },
+                drawings: strokesHistory,
+                gridStyle: document.getElementById('gridStyleSelect').value
+            };
+        }
+
+        function saveToLocal() {
+            const data = compileDataPayload();
+            localStorage.setItem('JI_Trench_Safety_Registry_Cache', JSON.stringify(data));
+            openModal(
+                "Safety Record Cached",
+                "Your exact compliance safety checks, excavation specifications, and drawings have been saved locally.",
+                "Acknowledged",
+                closeModal,
+                true
+            );
+        }
+
+        function loadFromLocal() {
+            const raw = localStorage.getItem('JI_Trench_Safety_Registry_Cache');
+            if (!raw) return;
+
+            try {
+                const data = JSON.parse(raw);
+                if (data.projectInformation) {
+                    document.getElementById('projName').value = data.projectInformation.projName || '';
+                    document.getElementById('jobLocation').value = data.projectInformation.jobLocation || '';
+                    document.getElementById('inspectDate').value = data.projectInformation.inspectDate || '';
+                    document.getElementById('inspectTime').value = data.projectInformation.inspectTime || '';
+                    document.getElementById('inspector').value = data.projectInformation.inspector || '';
+                    document.getElementById('superintendent').value = data.projectInformation.superintendent || '';
+                    document.getElementById('weather').value = data.projectInformation.weather || '';
+                }
+
+                if (data.excavationDetails) {
+                    document.getElementById('maxDepth').value = data.excavationDetails.maxDepth || '';
+                    document.getElementById('maxWidth').value = data.excavationDetails.maxWidth || '';
+                    document.getElementById('soilType').value = data.excavationDetails.soilType || 'Type A';
+                    document.getElementById('protectiveSystem').value = data.excavationDetails.protectiveSystem || '';
+                    document.getElementById('spoilPile').value = data.excavationDetails.spoilPile || '';
+                }
+
+                if (data.checklist) {
+                    checklistState = data.checklist;
+                    // Fixed: Keys are already strings from JSON.parse
+                    Object.keys(checklistState).forEach(id => {
+                        setItemStatus(parseInt(id), checklistState[id]);
+                    });
+                }
+
+                document.getElementById('observations').value = data.observations || '';
+
+                if (data.signatureBlock) {
+                    document.getElementById('printSignName').value = data.signatureBlock.printSignName || '';
+                    document.getElementById('signDate').value = data.signatureBlock.signDate || '';
+                    // Fixed: Restore all signature strokes
+                    if (Array.isArray(data.signatureBlock.signatureStrokesSerialized)) {
+                        signatureStrokes = data.signatureBlock.signatureStrokesSerialized;
+                        redrawSignatureCanvas();
+                    }
+                }
+
+                if (Array.isArray(data.drawings)) {
+                    strokesHistory = data.drawings;
+                    redrawCanvasVectors();
+                }
+
+                if (data.gridStyle) {
+                    document.getElementById('gridStyleSelect').value = data.gridStyle;
+                    setGridStyle(data.gridStyle);
+                }
+            } catch (err) {
+                console.error("Local Storage parsing error: ", err);
+            }
+        }
+
+        // Export clean application HTML code block
+        function exportAppHTML() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.setAttribute("href", url);
+            anchor.setAttribute("download", "daily_inspection.html");
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        // Service Worker Downloader for complete PWA installations
+        function exportServiceWorker() {
+            const swCode = `// J.I. Daily Safety Portal Service Worker
+const CACHE_NAME = 'ji-safety-v1';
+const ASSETS = [
+    './daily_inspection.html'
+];
+
+self.addEventListener('install', (e) => {
+    e.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS);
+        }).then(() => self.skipWaiting())
+    );
+});
+
+self.addEventListener('activate', (e) => {
+    e.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.map((key) => {
+                    if (key !== CACHE_NAME) {
+                        return caches.delete(key);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
+});
+
+self.addEventListener('fetch', (e) => {
+    e.respondWith(
+        caches.match(e.request).then((cachedResponse) => {
+            return cachedResponse || fetch(e.request);
+        })
+    );
+});`;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.setAttribute("href", url);
+            anchor.setAttribute("download", "sw.js");
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportJSONData() {
+            const data = compileDataPayload();
+            const blobString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const anchor = document.createElement('a');
+            anchor.setAttribute("href", blobString);
+            anchor.setAttribute("download", `DAILY_SAFETY_LOG_${data.projectInformation.projName || 'JOB'}_${data.projectInformation.inspectDate || 'DATE'}.json`);
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+        }
+
+        // Custom Modal UI handler
+        function openModal(title, body, primaryBtnText, primaryCallback, hideSecondary = false) {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').textContent = body;
+
+            const pBtn = document.getElementById('modalPrimaryBtn');
+            pBtn.textContent = primaryBtnText;
+            pBtn.onclick = primaryCallback;
+
+            const sBtn = document.getElementById('modalSecondaryBtn');
+            if (hideSecondary) {
+                sBtn.classList.add('hidden');
+            } else {
+                sBtn.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function triggerPrint() {
+            setViewMode('split');
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+    </script>
+</body>
+</html>
